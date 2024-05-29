@@ -1,0 +1,1 @@
+from .model import ResidualFCNet as SINR
