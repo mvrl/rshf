@@ -1,0 +1,1 @@
+from transformers import CLIPModel as StreetCLIP

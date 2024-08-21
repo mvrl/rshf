@@ -1,0 +1,1 @@
+from transformers import CLIPVisionModel as Sat2Cap
