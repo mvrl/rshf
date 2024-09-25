@@ -150,6 +150,7 @@ class MaskedAutoencoderViT(nn.Module, PyTorchModelHubMixin):
         self.initialize_weights()
     
     def transform(self, X, input_size):
+        t = []
         interpol_mode = transforms.InterpolationMode.BICUBIC
         if input_size <= 224:
             crop_pct = 224 / 256
@@ -443,6 +444,7 @@ class MaskedAutoencoderGroupChannelViT(nn.Module, PyTorchModelHubMixin):
             nn.init.constant_(m.weight, 1.0)
     
     def transform(self, X, input_size):
+        t = []
         interpol_mode = transforms.InterpolationMode.BICUBIC
         if input_size <= 224:
             crop_pct = 224 / 256
