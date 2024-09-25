@@ -13,6 +13,11 @@ model = SatMAE.from_pretrained("MVRL/satmae-vitlarge-fmow-pretrain-800")
 print(model.forward_encoder(torch.randn(1, 3, 224, 224), mask_ratio=0.0)[0].shape)
 ```
 
+### TODO:
+- [ ] Add transforms for each model
+- [ ] Add Documentation (https://rshf-docs.readthedocs.io/en/latest/)
+- [x] Add initial set of models
+
 ### Citations
 
 |Model Type|Venue|Citation|
