@@ -11,7 +11,24 @@ import torch
 import torch.nn as nn
 import timm
 from timm.models.vision_transformer import PatchEmbed, Block
+from torchvision import transforms
 from huggingface_hub import PyTorchModelHubMixin
+
+class SentinelNormalize:
+    """
+    Normalization for Sentinel-2 imagery, inspired from
+    https://github.com/ServiceNow/seasonal-contrast/blob/8285173ec205b64bc3e53b880344dd6c3f79fa7a/datasets/bigearthnet_dataset.py#L111
+    """
+    def __init__(self, mean, std):
+        self.mean = np.array(mean)
+        self.std = np.array(std)
+
+    def __call__(self, x, *args, **kwargs):
+        min_value = self.mean - 2 * self.std
+        max_value = self.mean + 2 * self.std
+        img = (x - min_value) / (max_value - min_value) * 255.0
+        img = np.clip(img, 0, 255).astype(np.uint8)
+        return img
 
 def get_2d_sincos_pos_embed(embed_dim, grid_size, cls_token=False):
     """
@@ -93,6 +110,9 @@ class MaskedAutoencoderViT(nn.Module, PyTorchModelHubMixin):
                  mlp_ratio=4., norm_layer=nn.LayerNorm, norm_pix_loss=False):
         super().__init__()
 
+        self.mean = [0.4182007312774658, 0.4214799106121063, 0.3991275727748871]
+        self.std = [0.28774282336235046, 0.27541765570640564, 0.2764017581939697]
+
         self.in_c = in_chans
 
         # --------------------------------------------------------------------------
@@ -128,6 +148,24 @@ class MaskedAutoencoderViT(nn.Module, PyTorchModelHubMixin):
         self.norm_pix_loss = norm_pix_loss
 
         self.initialize_weights()
+    
+    def transform(self, X):
+        interpol_mode = transforms.InterpolationMode.BICUBIC
+        if input_size <= 224:
+            crop_pct = 224 / 256
+        else:
+            crop_pct = 1.0
+        size = int(input_size / crop_pct)
+
+        t.append(transforms.ToTensor())
+        t.append(transforms.Normalize(self.mean, self.std))
+        t.append(
+            transforms.Resize(size, interpolation=interpol_mode),  # to maintain same ratio w.r.t. 224 images
+        )
+        t.append(transforms.CenterCrop(input_size))
+        transform = transforms.Compose(t)
+        return transform(X)
+
 
     def initialize_weights(self):
         # initialization
@@ -302,6 +340,12 @@ class MaskedAutoencoderGroupChannelViT(nn.Module, PyTorchModelHubMixin):
 
     def __init__(self, config):
         super().__init__()
+        self.mean = [1370.19151926, 1184.3824625 , 1120.77120066, 1136.26026392,
+            1263.73947144, 1645.40315151, 1846.87040806, 1762.59530783,
+            1972.62420416,  582.72633433,   14.77112979, 1732.16362238, 1247.91870117]
+        self.std = [633.15169573,  650.2842772 ,  712.12507725,  965.23119807,
+           948.9819932 , 1108.06650639, 1258.36394548, 1233.1492281 ,
+           1364.38688993,  472.37967789,   14.3114637 , 1310.36996126, 1087.6020813]
 
         self.in_c = config['in_chans']
         self.patch_size = config['patch_size']
@@ -397,6 +441,25 @@ class MaskedAutoencoderGroupChannelViT(nn.Module, PyTorchModelHubMixin):
         elif isinstance(m, nn.LayerNorm):
             nn.init.constant_(m.bias, 0)
             nn.init.constant_(m.weight, 1.0)
+    
+    def transform(self, X):
+        interpol_mode = transforms.InterpolationMode.BICUBIC
+        if input_size <= 224:
+            crop_pct = 224 / 256
+        else:
+            crop_pct = 1.0
+        size = int(input_size / crop_pct)
+
+        t.append(SentinelNormalize(self.mean, self.std))
+        t.append(transforms.ToTensor())
+        t.append(
+            transforms.Resize(size, interpolation=interpol_mode),  # to maintain same ratio w.r.t. 224 images
+        )
+        t.append(transforms.CenterCrop(input_size))
+
+        transform = transforms.Compose(t)
+
+        return transform(X)
 
     def patchify(self, imgs, p, c):
         """
