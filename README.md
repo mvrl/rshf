@@ -10,7 +10,8 @@ pip install rshf
 ```python
 from rshf.satmae import SatMAE
 model = SatMAE.from_pretrained("MVRL/satmae-vitlarge-fmow-pretrain-800")
-print(model.forward_encoder(torch.randn(1, 3, 224, 224), mask_ratio=0.0)[0].shape)
+input = model.transform(torch.randint(0, 256, (224, 224, 3)).float().numpy(), 224).unsqueeze(0)
+print(model.forward_encoder(input, mask_ratio=0.0)[0].shape)
 ```
 
 ### TODO:

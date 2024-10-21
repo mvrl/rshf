@@ -1,1 +1,1 @@
-from .model import ResidualFCNet as SINR
+from .model import ResidualFCNet as SINR, config, preprocess_locs
