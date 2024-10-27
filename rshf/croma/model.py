@@ -6,26 +6,30 @@ import torch
 from collections import OrderedDict
 import warnings
 from huggingface_hub import PyTorchModelHubMixin
-
+from transformers import PretrainedConfig
 
 class CROMA(nn.Module, PyTorchModelHubMixin):
-    def __init__(self, size='base', modality='both', image_resolution=120):
+    def __init__(self, config: PretrainedConfig):
         """
         NOTE: image_resolution is not the spatial, spectral, or temporal resolution. It is the height and width of the image, in pixels.
         E.g., CROMA was pretrained on 120x120px images, hence image_resolution is 120 by default
         """
         super().__init__()
+        self.config = config
+        if type(config) == dict:
+            self.config = PretrainedConfig.from_dict(config)
+
         # check types
-        assert type(size) == str, f'size must be a string, not {type(size)}'
-        assert type(modality) == str, f'modality must be a string, not {type(modality)}'
-        assert type(image_resolution) == int, f'image_resolution must be an int, not {type(image_resolution)}'
+        assert type(self.config.size) == str, f'size must be a string, not {type(self.config.size)}'
+        assert type(self.config.modality) == str, f'modality must be a string, not {type(self.config.modality)}'
+        assert type(self.config.image_resolution) == int, f'image_resolution must be an int, not {type(self.config.image_resolution)}'
 
         # check values
-        assert size in ['base', 'large'], f'size must be either base or large, not {size}'
-        assert image_resolution % 8 == 0, f'image_resolution must be a multiple of 8, not {image_resolution}'
-        assert modality in ['both', 'SAR', 'optical'], f'modality must be either both, SAR, or optical, not {modality}'
+        assert self.config.size in ['base', 'large'], f'size must be either base or large, not {self.config.size}'
+        assert self.config.image_resolution % 8 == 0, f'image_resolution must be a multiple of 8, not {self.config.image_resolution}'
+        assert self.config.modality in ['both', 'SAR', 'optical'], f'modality must be either both, SAR, or optical, not {self.config.modality}'
 
-        if size == 'base':
+        if self.config.size == 'base':
             self.encoder_dim = 768
             self.encoder_depth = 12
             self.num_heads = 16
@@ -37,13 +41,13 @@ class CROMA(nn.Module, PyTorchModelHubMixin):
             self.num_heads = 16
             self.patch_size = 8
 
-        self.modality = modality
-        self.num_patches = int((image_resolution/8)**2)
+        self.modality = self.config.modality
+        self.num_patches = int((self.config.image_resolution/8)**2)
         self.s1_channels = 2  # fixed at 2 SAR backscatter channels
         self.s2_channels = 12  # fixed at 12 multispectral optical channels
         self.attn_bias = get_2dalibi(num_heads=self.num_heads, num_patches=self.num_patches)
 
-        if modality in ['SAR', 'both']:
+        if self.config.modality in ['SAR', 'both']:
             print(f'Initializing SAR encoder')
             self.s1_encoder = ViT(dim=self.encoder_dim, depth=int(self.encoder_depth/2), in_channels=self.s1_channels)
             self.GAP_FFN_s1 = nn.Sequential(
@@ -55,7 +59,7 @@ class CROMA(nn.Module, PyTorchModelHubMixin):
             
             # load weights
 
-        if modality in ['optical', 'both']:
+        if self.config.modality in ['optical', 'both']:
             print(f'Initializing optical encoder')
             self.s2_encoder = ViT(dim=self.encoder_dim, depth=self.encoder_depth, in_channels=self.s2_channels)
             self.GAP_FFN_s2 = nn.Sequential(
@@ -69,7 +73,7 @@ class CROMA(nn.Module, PyTorchModelHubMixin):
             # self.s2_encoder.load_state_dict(torch.load(pretrained_path)['s2_encoder'])
             # self.GAP_FFN_s2.load_state_dict(torch.load(pretrained_path)['s2_GAP_FFN'])
 
-        if modality == 'both':
+        if self.config.modality == 'both':
             print(f'Initializing joint SAR-optical encoder')
             self.cross_encoder = BaseTransformerCrossAttn(dim=self.encoder_dim,
                                                         depth=int(self.encoder_depth/2),

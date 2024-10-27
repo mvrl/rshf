@@ -2,11 +2,8 @@ import torch
 import torch.nn as nn
 import math
 from huggingface_hub import PyTorchModelHubMixin
+from transformers import PretrainedConfig
 
-config = {}
-config['num_inputs'] = 4
-config['num_classes'] = 47375
-config['num_filts'] = 256
 
 class ResLayer(nn.Module):
     def __init__(self, linear_size):
@@ -29,15 +26,19 @@ class ResLayer(nn.Module):
 
 class ResidualFCNet(nn.Module, PyTorchModelHubMixin):
 
-    def __init__(self, num_inputs=config['num_inputs'], num_classes=config['num_classes'], num_filts=config['num_filts'], depth=4):
+    def __init__(self, config: PretrainedConfig):
         super(ResidualFCNet, self).__init__()
+        self.config = config
+        if type(config) is dict:
+            self.config = PretrainedConfig().from_dict(config)
         self.inc_bias = False
-        self.class_emb = nn.Linear(num_filts, num_classes, bias=self.inc_bias)
+        if self.config.num_classes > 0: 
+            self.class_emb = nn.Linear(self.config.num_filts, self.config.num_classes, bias=self.inc_bias)
         layers = []
-        layers.append(nn.Linear(num_inputs, num_filts))
+        layers.append(nn.Linear(self.config.num_inputs, self.config.num_filts))
         layers.append(nn.ReLU(inplace=True))
-        for i in range(depth):
-            layers.append(ResLayer(num_filts))
+        for i in range(self.config.depth):
+            layers.append(ResLayer(self.config.num_filts))
         self.feats = torch.nn.Sequential(*layers)
 
     def forward(self, x, class_of_interest=None, return_feats=True):

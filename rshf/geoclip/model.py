@@ -4,6 +4,7 @@ from typing import Optional
 from torch import Tensor
 import numpy as np
 from huggingface_hub import PyTorchModelHubMixin
+from transformers import PretrainedConfig
 
 # Constants
 A1 = 1.340264
@@ -89,18 +90,18 @@ def equal_earth_projection(L):
     return (torch.stack((x, y), dim=1) * SF) / 180
 
 class LocationEncoderCapsule(nn.Module):
-    def __init__(self, sigma):
+    def __init__(self, sigma, input_size=2, encoded_size=256, dim=512):
         super(LocationEncoderCapsule, self).__init__()
-        rff_encoding = GaussianEncoding(sigma=sigma, input_size=2, encoded_size=256)
+        rff_encoding = GaussianEncoding(sigma=sigma, input_size=input_size, encoded_size=encoded_size)
         self.km = sigma
         self.capsule = nn.Sequential(rff_encoding,
-                                     nn.Linear(512, 1024),
+                                     nn.Linear(dim, 2*dim),
                                      nn.ReLU(),
-                                     nn.Linear(1024, 1024),
+                                     nn.Linear(2*dim, 2*dim),
                                      nn.ReLU(),
-                                     nn.Linear(1024, 1024),
+                                     nn.Linear(2*dim, 2*dim),
                                      nn.ReLU())
-        self.head = nn.Sequential(nn.Linear(1024, 512))
+        self.head = nn.Sequential(nn.Linear(2*dim, dim))
 
     def forward(self, x):
         x = self.capsule(x)
@@ -108,17 +109,17 @@ class LocationEncoderCapsule(nn.Module):
         return x
 
 class LocationEncoder(nn.Module, PyTorchModelHubMixin):
-    def __init__(self):
+    def __init__(self, config: PretrainedConfig):
         super(LocationEncoder, self).__init__()
-        self.sigma = [2**0, 2**4, 2**8]
-        self.n = len(self.sigma)
+        self.config = config
+        self.n = len(self.config["sigma"])
 
-        for i, s in enumerate(self.sigma):
-            self.add_module('LocEnc' + str(i), LocationEncoderCapsule(sigma=s))
+        for i, s in enumerate(self.config["sigma"]):
+            self.add_module('LocEnc' + str(i), LocationEncoderCapsule(sigma=s, input_size=self.config["input_size"], encoded_size=self.config["encoded_size"], dim=self.config["dim"]))
 
     def forward(self, location):
         location = equal_earth_projection(location)
-        location_features = torch.zeros(location.shape[0], 512).to(location.device)
+        location_features = torch.zeros(location.shape[0], self.config["dim"]).to(location.device)
 
         for i in range(self.n):
             location_features += self._modules['LocEnc' + str(i)](location)

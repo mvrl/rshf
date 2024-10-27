@@ -13,6 +13,7 @@ import timm
 from timm.models.vision_transformer import PatchEmbed, Block
 from torchvision import transforms
 from huggingface_hub import PyTorchModelHubMixin
+from transformers import PretrainedConfig
 
 class SentinelNormalize:
     """
@@ -104,48 +105,48 @@ def get_1d_sincos_pos_embed_from_grid_torch(embed_dim, pos):
 class MaskedAutoencoderViT(nn.Module, PyTorchModelHubMixin):
     """ Masked Autoencoder with VisionTransformer backbone
     """
-    def __init__(self, img_size=224, patch_size=16, in_chans=3,
-                 embed_dim=1024, depth=24, num_heads=16,
-                 decoder_embed_dim=512, decoder_depth=8, decoder_num_heads=16,
-                 mlp_ratio=4., norm_layer=nn.LayerNorm, norm_pix_loss=False):
+    def __init__(self, config):
         super().__init__()
 
-        self.mean = [0.4182007312774658, 0.4214799106121063, 0.3991275727748871]
-        self.std = [0.28774282336235046, 0.27541765570640564, 0.2764017581939697]
+        self.config = config
+        if type(config) is dict:
+            config = PretrainedConfig.from_dict(config)
+            self.config = config
 
-        self.in_c = in_chans
+        self.in_c = config.in_chans
+        self.patch_size = config.patch_size
+        num_patches = config.img_size // config.patch_size * config.img_size // config.patch_size
 
         # --------------------------------------------------------------------------
         # MAE encoder specifics
-        self.patch_embed = PatchEmbed(img_size, patch_size, in_chans, embed_dim)
-        num_patches = self.patch_embed.num_patches
+        self.patch_embed = PatchEmbed(config.img_size, config.patch_size, config.in_chans, config.embed_dim)
 
-        self.cls_token = nn.Parameter(torch.zeros(1, 1, embed_dim))
-        self.pos_embed = nn.Parameter(torch.zeros(1, num_patches + 1, embed_dim), requires_grad=False)  # fixed sin-cos embedding
+        self.cls_token = nn.Parameter(torch.zeros(1, 1, config.embed_dim))
+        self.pos_embed = nn.Parameter(torch.zeros(1, num_patches + 1, config.embed_dim), requires_grad=False)  # fixed sin-cos embedding
 
         self.blocks = nn.ModuleList([
-            Block(embed_dim, num_heads, mlp_ratio, qkv_bias=True, norm_layer=norm_layer)
-            for i in range(depth)])
-        self.norm = norm_layer(embed_dim)
+            Block(config.embed_dim, config.num_heads, config.mlp_ratio, qkv_bias=True, norm_layer=nn.LayerNorm)
+            for i in range(config.depth)])
+        self.norm = nn.LayerNorm(config.embed_dim)
         # --------------------------------------------------------------------------
 
         # --------------------------------------------------------------------------
         # MAE decoder specifics
-        self.decoder_embed = nn.Linear(embed_dim, decoder_embed_dim, bias=True)
+        self.decoder_embed = nn.Linear(config.embed_dim, config.decoder_embed_dim, bias=True)
 
-        self.mask_token = nn.Parameter(torch.zeros(1, 1, decoder_embed_dim))
+        self.mask_token = nn.Parameter(torch.zeros(1, 1, config.decoder_embed_dim))
 
-        self.decoder_pos_embed = nn.Parameter(torch.zeros(1, num_patches + 1, decoder_embed_dim), requires_grad=False)  # fixed sin-cos embedding
+        self.decoder_pos_embed = nn.Parameter(torch.zeros(1, num_patches + 1, config.decoder_embed_dim), requires_grad=False)  # fixed sin-cos embedding
 
         self.decoder_blocks = nn.ModuleList([
-            Block(decoder_embed_dim, decoder_num_heads, mlp_ratio, qkv_bias=True, norm_layer=norm_layer)
-            for i in range(decoder_depth)])
+            Block(config.decoder_embed_dim, config.decoder_num_heads, config.mlp_ratio, qkv_bias=True, norm_layer=nn.LayerNorm)
+            for i in range(config.decoder_depth)])
 
-        self.decoder_norm = norm_layer(decoder_embed_dim)
-        self.decoder_pred = nn.Linear(decoder_embed_dim, patch_size**2 * in_chans, bias=True) # decoder to patch
+        self.decoder_norm = nn.LayerNorm(config.decoder_embed_dim)
+        self.decoder_pred = nn.Linear(config.decoder_embed_dim, config.patch_size**2 * config.in_chans, bias=True) # decoder to patch
         # --------------------------------------------------------------------------
 
-        self.norm_pix_loss = norm_pix_loss
+        self.norm_pix_loss = config.norm_pix_loss
 
         self.initialize_weights()
     
@@ -159,7 +160,7 @@ class MaskedAutoencoderViT(nn.Module, PyTorchModelHubMixin):
         size = int(input_size / crop_pct)
 
         t.append(transforms.ToTensor())
-        t.append(transforms.Normalize(self.mean, self.std))
+        t.append(transforms.Normalize(self.config.img_mean, self.config.img_std))
         t.append(
             transforms.Resize(size, interpolation=interpol_mode),  # to maintain same ratio w.r.t. 224 images
         )
@@ -334,6 +335,7 @@ class MaskedAutoencoderViT(nn.Module, PyTorchModelHubMixin):
         pred = self.forward_decoder(latent, ids_restore)  # [N, L, p*p*3]
         loss = self.forward_loss(imgs, pred, mask)
         return loss, pred, mask
+
 
 class MaskedAutoencoderGroupChannelViT(nn.Module, PyTorchModelHubMixin):
     """ Masked Autoencoder with VisionTransformer backbone
@@ -667,6 +669,8 @@ class MaskedAutoencoderGroupChannelViT(nn.Module, PyTorchModelHubMixin):
         pred = self.forward_decoder(latent, ids_restore)  # [N, C, L, p*p]
         loss = self.forward_loss(imgs, pred, mask)
         return loss, pred, mask
+    
+# write init of maskedautoencoder
 
 class GroupChannelsVisionTransformer(timm.models.vision_transformer.VisionTransformer, PyTorchModelHubMixin):
     """ Vision Transformer with support for global average pooling
