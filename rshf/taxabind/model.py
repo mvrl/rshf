@@ -25,7 +25,7 @@ class TaxaBind:
         transforms.Normalize(mean=self.config.normalize_mean, std=self.config.normalize_std)])
     
     def get_audio_encoder(self):
-        return ClapAudioModelWithProjection(self.config.audio_encoder)
+        return ClapAudioModelWithProjection.from_pretrained(self.config.audio_encoder)
     
     def process_audio(self, track, sr):
         processor = ClapProcessor.from_pretrained(self.config.audio_encoder)
@@ -47,7 +47,7 @@ class TaxaBind:
         return SINR.preprocess_locs
     
     def get_sat_encoder(self):
-        return CLIPVisionModelWithProjection(self.config.sat_encoder)
+        return CLIPVisionModelWithProjection.from_pretrained(self.config.sat_encoder)
     
     def get_sat_processor(self):
         return transforms.Compose([transforms.Resize((self.config.sat_resize, self.config.sat_resize)),

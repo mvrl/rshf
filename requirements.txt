@@ -5,3 +5,4 @@ huggingface_hub>=0.23.1
 einops>=0.8.0
 transformers>=4.41.1
 open_clip_torch>=2.24.0
+torchaudio
