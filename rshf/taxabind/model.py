@@ -38,10 +38,10 @@ class TaxaBind:
         return self.process_audio
     
     def get_location_encoder(self):
-        return GeoCLIP(self.config.location_encoder)
+        return GeoCLIP.from_pretrained(self.config.location_encoder)
     
     def get_env_encoder(self):
-        return SINR(self.config.sinr)
+        return SINR.from_pretrained(self.config.sinr)
     
     def get_env_processor(self):
         return SINR.preprocess_locs
