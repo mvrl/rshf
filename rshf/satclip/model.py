@@ -121,6 +121,7 @@ class SatClip(nn.Module, PyTorchModelHubMixin):
     def __init__(self):
         super().__init__()
         self.location = LocationEncoder()
+        self.location = self.location.double()
     
     def forward(self, x):
         return self.location(x)
