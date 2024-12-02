@@ -1,6 +1,9 @@
 # rshf
-![PyPI - Version](https://img.shields.io/pypi/v/rshf)
-![PyPI Downloads](https://static.pepy.tech/badge/rshf)
+[![PyPI - Version](https://img.shields.io/pypi/v/rshf)](https://pypi.org/project/rshf/)
+[![PyPI Downloads](https://static.pepy.tech/badge/rshf)](https://pypistats.org/packages/rshf)
+[![PyPI Docs](https://img.shields.io/readthedocs/rshf)](https://rshf-docs.readthedocs.io/en/latest/)
+
+
 ### Remote sensing pretrained models easy loading using huggingface -- PyTorch (for fast benchmarking)
 
 ### Installation:
