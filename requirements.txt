@@ -6,4 +6,4 @@ einops>=0.8.0
 transformers>=4.41.1
 open_clip_torch>=2.24.0
 torchaudio
-clip @ git+https://github.com/openai/CLIP@main
+openai-clip>=1.0.1
