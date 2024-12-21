@@ -24,7 +24,3 @@ class SenCLIP(nn.Module, PyTorchModelHubMixin):
         
         self.device = "cpu" if not torch.cuda.is_available() else self.config.device
         self.clip, _ = clip.load(self.config.architecture, device=self.device)
-        
-
-
-
