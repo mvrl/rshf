@@ -28,7 +28,7 @@ class TaxaBind:
         return ClapAudioModelWithProjection.from_pretrained(self.config.audio_encoder)
     
     def process_audio(self, track, sr):
-        processor = ClapProcessor.from_pretrained("laion/clap-htsat-unfused")
+        processor = ClapProcessor.from_pretrained(self.config.get_audio_processor)
         track = track.mean(axis=0)
         track = torchaudio.functional.resample(track, orig_freq=sr, new_freq=self.config.audio_sample_rate)
         output = processor(audios=track, sampling_rate=self.config.audio_sample_rate, max_length_s=self.config.audio_max_length_s, return_tensors="pt",padding=self.config.audio_padding,truncation=self.config.audio_truncation)
