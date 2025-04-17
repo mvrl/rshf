@@ -2,7 +2,7 @@ import torch
 
 from .direct import Direct
 from .siren import SirenNet
-
+from transformers import PretrainedConfig
 from huggingface_hub import PyTorchModelHubMixin
 
 VAR_NAMES = [
@@ -53,8 +53,11 @@ CHELSA_STD = torch.tensor(
 
 
 class Climplicit(torch.nn.Module, PyTorchModelHubMixin):
-    def __init__(self, return_chelsa=False):
+    def __init__(self, config: PretrainedConfig):
         super().__init__()
+        self.config = config
+        if type(config) is dict:
+            self.config = PretrainedConfig().from_dict(config)
 
         self.location_encoder = SirenNet(
             dim_in=4,
@@ -70,7 +73,7 @@ class Climplicit(torch.nn.Module, PyTorchModelHubMixin):
 
         self.chelsa_regressor = torch.nn.Linear(256, 11)        
 
-        self.return_chelsa = return_chelsa
+        self.return_chelsa = self.config.return_chelsa
 
     def forward(self, coordinates, month=None):
         # Apply the positional embedding
@@ -115,7 +118,7 @@ class Climplicit(torch.nn.Module, PyTorchModelHubMixin):
 
 
 if __name__ == "__main__":
-    model = Climplicit(return_chelsa=False).from_pretrained("Jobedo/climplicit")
+    model = Climplicit.from_pretrained("Jobedo/climplicit")
 
     loc = [8.550155, 47.396702]  # Lon/Lat or our office
     april = 4  # April
