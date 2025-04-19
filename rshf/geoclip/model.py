@@ -108,8 +108,34 @@ class LocationEncoderCapsule(nn.Module):
         x = self.head(x)
         return x
 
+class GeoCLIPConfig(PretrainedConfig):
+    def __init__(self, sigma=None, input_size=2, encoded_size=256, dim=512):
+        super().__init__()
+        self.sigma = sigma
+        self.input_size = input_size
+        self.encoded_size = encoded_size
+        self.dim = dim
+    
+    def from_dict(self, config_dict):
+        for key, value in config_dict.items():
+            setattr(self, key, value)
+        return self
+
+
 class LocationEncoder(nn.Module, PyTorchModelHubMixin):
     def __init__(self, config: PretrainedConfig):
+        """
+        Example Usage:
+        >>> from rshf.geoclip import GeoCLIP
+        >>> model = GeoCLIP.from_pretrained("rshf/geoclip")
+        >>> locs = torch.FloatTensor([[-80.0, 40.0]]) # Lon/Lat
+        >>> embeddings = model(locs)
+
+        Define GeoCLIP model from scratch
+        >>> from rshf.geoclip import GeoCLIP, GeoCLIPConfig
+        >>> config = GeoCLIPConfig(sigma=[2, 2**2], input_size=2, encoded_size=256, dim=512)
+        >>> model = GeoCLIP(config)
+        """
         super(LocationEncoder, self).__init__()
         self.config = config
         self.n = len(self.config["sigma"])
