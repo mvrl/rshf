@@ -1,7 +1,5 @@
 ## Climplicit
 
-Example usage can be seen in __main__ in model.py
-
 Arxiv: https://arxiv.org/abs/2504.05089 \
 GitHub: https://github.com/ecovision-uzh/climplicit \
 Project page: https://ecovision-uzh.github.io/climplicit/ \

@@ -115,23 +115,3 @@ class Climplicit(torch.nn.Module, PyTorchModelHubMixin):
             x = self.chelsa_regressor(x)
             x = x * CHELSA_STD + CHELSA_MEAN
         return x
-
-
-if __name__ == "__main__":
-    model = Climplicit.from_pretrained("Jobedo/climplicit")
-
-    loc = [8.550155, 47.396702]  # Lon/Lat or our office
-    april = 4  # April
-    batchsize = 10
-
-    # Call with a month
-    month = torch.ones(batchsize) * april
-    print("Output shape with month:", model(torch.tensor([loc] * batchsize), month).shape)
-
-    # Call without month
-    print("Output shape without month:", model(torch.tensor([loc] * batchsize)).shape)
-
-    # Return the CHELSA reconstruction instead of Climplicit embeddings
-    model.return_chelsa=True
-    print("Output shape of CHELSA reconstruction with month:", model(torch.tensor([loc] * batchsize), month).shape)
-
