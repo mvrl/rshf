@@ -1,1 +1,1 @@
-from .model import LocationEncoder as GeoCLIP
+from .model import LocationEncoder as GeoCLIP, GeoCLIPConfig

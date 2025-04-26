@@ -138,14 +138,16 @@ class LocationEncoder(nn.Module, PyTorchModelHubMixin):
         """
         super(LocationEncoder, self).__init__()
         self.config = config
-        self.n = len(self.config["sigma"])
+        if type(config) is dict:
+            self.config = PretrainedConfig().from_dict(config)
+        self.n = len(self.config.sigma)
 
-        for i, s in enumerate(self.config["sigma"]):
-            self.add_module('LocEnc' + str(i), LocationEncoderCapsule(sigma=s, input_size=self.config["input_size"], encoded_size=self.config["encoded_size"], dim=self.config["dim"]))
+        for i, s in enumerate(self.config.sigma):
+            self.add_module('LocEnc' + str(i), LocationEncoderCapsule(sigma=s, input_size=self.config.input_size, encoded_size=self.config.encoded_size, dim=self.config.dim))
 
     def forward(self, location):
         location = equal_earth_projection(location)
-        location_features = torch.zeros(location.shape[0], self.config["dim"]).to(location.device)
+        location_features = torch.zeros(location.shape[0], self.config.dim).to(location.device)
 
         for i in range(self.n):
             location_features += self._modules['LocEnc' + str(i)](location)

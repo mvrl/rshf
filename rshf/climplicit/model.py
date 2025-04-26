@@ -53,6 +53,38 @@ CHELSA_STD = torch.tensor(
 
 
 class Climplicit(torch.nn.Module, PyTorchModelHubMixin):
+    """
+    CLIMPLICIT IMPLICITLY ENCODES GLOBAL CLIMATIC INFORMATION.
+
+    config: Dict
+    -> "return_chelsa": bool, defines whether the implicit embeddings
+        or original CHELSA reconstructions should be returned by the forward pass.
+
+    EXAMPLE USAGE:
+
+    import torch
+    from rshf.climplicit import Climplicit
+
+    model = Climplicit.from_pretrained("Jobedo/climplicit", config={"return_chelsa": False})
+
+    loc = [8.550155, 47.396702]  # Lon/Lat or our office
+    april = 4  # April
+    batchsize = 10
+
+    # Call with a month
+    month = torch.ones(batchsize) * april
+    print("Output shape with month:", model(torch.tensor([loc] * batchsize), month).shape)
+    # >>> Output shape with month: torch.Size([10, 256])
+
+    # Call without month
+    print("Output shape without month:", model(torch.tensor([loc] * batchsize)).shape)
+    # >>> Output shape without month: torch.Size([10, 1024])
+
+    # Return the CHELSA reconstruction instead of Climplicit embeddings
+    model = Climplicit({"return_chelsa": True})
+    print("Output shape of CHELSA reconstruction with month:", model(torch.tensor([loc] * batchsize), month).shape)
+    # >>> Output shape of CHELSA reconstruction with month: torch.Size([10, 11])
+    """
     def __init__(self, config: PretrainedConfig):
         super().__init__()
         self.config = config
@@ -87,8 +119,8 @@ class Climplicit(torch.nn.Module, PyTorchModelHubMixin):
                 loc_month = torch.concat(
                     [
                         loc,
-                        torch.sin(month / 12 * torch.pi * 2).unsqueeze(dim=-1),
-                        torch.cos(month / 12 * torch.pi * 2).unsqueeze(dim=-1),
+                        torch.sin(month / 12 * torch.pi * 2).unsqueeze(dim=-1).to(loc.device),
+                        torch.cos(month / 12 * torch.pi * 2).unsqueeze(dim=-1).to(loc.device),
                     ],
                     dim=-1,
                 )
@@ -116,44 +148,6 @@ class Climplicit(torch.nn.Module, PyTorchModelHubMixin):
             x = x * CHELSA_STD + CHELSA_MEAN
         return x
 
-    def __str__(self):
-        docstring = """
-CLIMPLICIT IMPLICITLY ENCODES GLOBAL CLIMATIC INFORMATION.
-
-config: Dict
--> "return_chelsa": bool, defines whether the implicit embeddings
-    or original CHELSA reconstructions should be returned by the forward pass.
-
-EXAMPLE USAGE:
-
-import torch
-from rshf.climplicit import Climplicit
-
-model = Climplicit({"return_chelsa": False})
-
-loc = [8.550155, 47.396702]  # Lon/Lat or our office
-april = 4  # April
-batchsize = 10
-
-# Call with a month
-month = torch.ones(batchsize) * april
-print("Output shape with month:", model(torch.tensor([loc] * batchsize), month).shape)
-# >>> Output shape with month: torch.Size([10, 256])
-
-# Call without month
-print("Output shape without month:", model(torch.tensor([loc] * batchsize)).shape)
-# >>> Output shape without month: torch.Size([10, 1024])
-
-# Return the CHELSA reconstruction instead of Climplicit embeddings
-model = Climplicit({"return_chelsa": True})
-print("Output shape of CHELSA reconstruction with month:", model(torch.tensor([loc] * batchsize), month).shape)
-# >>> Output shape of CHELSA reconstruction with month: torch.Size([10, 11])
-
-MODEL ARCHITECTURE:
-
-"""
-        docstring += super().__str__()
-        return docstring
 
 if __name__ == "__main__":
-    print(Climplicit({"return_chelsa": False}))
+    print(Climplicit.from_pretrained("Jobedo/climplicit", config={"return_chelsa": False}))
