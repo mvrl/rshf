@@ -120,6 +120,10 @@ class Climplicit(torch.nn.Module, PyTorchModelHubMixin):
         docstring = """
 Climplicit implicitly encodes global climatic information. 
 
+config: Dict
+-> "return_chelsa": bool, defines whether the implicit embeddings
+    or original CHELSA reconstructions should be returned by the forward pass.
+
 Example usage:
 
 import torch
