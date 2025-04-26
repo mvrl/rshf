@@ -1,7 +1,7 @@
 import torch
 
-from .direct import Direct
-from .siren import SirenNet
+from direct import Direct
+from siren import SirenNet
 from transformers import PretrainedConfig
 from huggingface_hub import PyTorchModelHubMixin
 
@@ -118,9 +118,9 @@ class Climplicit(torch.nn.Module, PyTorchModelHubMixin):
 
     def __str__(self):
         docstring = """
-Climplicit implicitly encodes global climatic information. 
+CLIMPLICIT IMPLICITLY ENCODES GLOBAL CLIMATIC INFORMATION.
 
-Example usage:
+EXAMPLE USAGE:
 
 import torch
 from rshf.climplicit import Climplicit
@@ -144,7 +144,11 @@ print("Output shape without month:", model(torch.tensor([loc] * batchsize)).shap
 model = Climplicit({"return_chelsa": True})
 print("Output shape of CHELSA reconstruction with month:", model(torch.tensor([loc] * batchsize), month).shape)
 # >>> Output shape of CHELSA reconstruction with month: torch.Size([10, 11])
+
+MODEL ARCHITECTURE:
+
 """
+        docstring += super().__str__()
         return docstring
 
 if __name__ == "__main__":
