@@ -115,3 +115,37 @@ class Climplicit(torch.nn.Module, PyTorchModelHubMixin):
             x = self.chelsa_regressor(x)
             x = x * CHELSA_STD + CHELSA_MEAN
         return x
+
+    def __str__(self):
+        docstring = """
+Climplicit implicitly encodes global climatic information. 
+
+Example usage:
+
+import torch
+from rshf.climplicit import Climplicit
+
+model = Climplicit({"return_chelsa": False})
+
+loc = [8.550155, 47.396702]  # Lon/Lat or our office
+april = 4  # April
+batchsize = 10
+
+# Call with a month
+month = torch.ones(batchsize) * april
+print("Output shape with month:", model(torch.tensor([loc] * batchsize), month).shape)
+# >>> Output shape with month: torch.Size([10, 256])
+
+# Call without month
+print("Output shape without month:", model(torch.tensor([loc] * batchsize)).shape)
+# >>> Output shape without month: torch.Size([10, 1024])
+
+# Return the CHELSA reconstruction instead of Climplicit embeddings
+model = Climplicit({"return_chelsa": True})
+print("Output shape of CHELSA reconstruction with month:", model(torch.tensor([loc] * batchsize), month).shape)
+# >>> Output shape of CHELSA reconstruction with month: torch.Size([10, 11])
+"""
+        return docstring
+
+if __name__ == "__main__":
+    print(Climplicit({"return_chelsa": False}))
