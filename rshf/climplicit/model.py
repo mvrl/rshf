@@ -1,7 +1,7 @@
 import torch
 
-from direct import Direct
-from siren import SirenNet
+from .direct import Direct
+from .siren import SirenNet
 from transformers import PretrainedConfig
 from huggingface_hub import PyTorchModelHubMixin
 
