@@ -129,7 +129,7 @@ EXAMPLE USAGE:
 import torch
 from rshf.climplicit import Climplicit
 
-model = Climplicit({"return_chelsa": False})
+model = Climplicit.from_pretrained("Jobedo/climplicit", config={"return_chelsa": False})
 
 loc = [8.550155, 47.396702]  # Lon/Lat or our office
 april = 4  # April
@@ -145,7 +145,7 @@ print("Output shape without month:", model(torch.tensor([loc] * batchsize)).shap
 # >>> Output shape without month: torch.Size([10, 1024])
 
 # Return the CHELSA reconstruction instead of Climplicit embeddings
-model = Climplicit({"return_chelsa": True})
+model = Climplicit.from_pretrained("Jobedo/climplicit", config={"return_chelsa": True})
 print("Output shape of CHELSA reconstruction with month:", model(torch.tensor([loc] * batchsize), month).shape)
 # >>> Output shape of CHELSA reconstruction with month: torch.Size([10, 11])
 
