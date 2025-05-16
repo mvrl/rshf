@@ -101,6 +101,52 @@ def get_1d_sincos_pos_embed_from_grid_torch(embed_dim, pos):
     emb = torch.cat([emb_sin, emb_cos], dim=1)  # (M, D)
     return emb.double()
 
+class SatMAEConfig(PretrainedConfig):
+    """
+    Configuration class to store the configuration of a `SatMAE` model.
+    Arguments:
+
+    """
+    def __init__(self, decoder_depth=8,
+                decoder_embed_dim=512,
+                decoder_num_heads=16,
+                depth=24,
+                embed_dim=1024,
+                img_mean=[
+                    0.4182007312774658,
+                    0.4214799106121063,
+                    0.3991275727748871
+                ],
+                img_size=224,
+                img_std=[
+                    0.28774282336235046,
+                    0.27541765570640564,
+                    0.2764017581939697
+                ],
+                in_chans=3,
+                mlp_ratio=4,
+                norm_pix_loss=False,
+                num_heads=16,
+                patch_size=16
+    ):
+        super(SatMAEConfig, self).__init__()
+        self.decoder_depth = decoder_depth
+        self.decoder_embed_dim = decoder_embed_dim
+        self.decoder_num_heads = decoder_num_heads
+        self.depth = depth
+        self.embed_dim = embed_dim
+        self.img_mean = img_mean
+        self.img_size = img_size
+        self.in_chans = in_chans
+        self.mlp_ratio = mlp_ratio
+        self.norm_pix_loss = norm_pix_loss
+        self.num_heads = num_heads
+        self.patch_size = patch_size
+
+    def from_dict(self, config_dict):
+        for key, value in config_dict.items():
+            setattr(self, key, value)
+        return self
 
 class MaskedAutoencoderViT(nn.Module, PyTorchModelHubMixin):
     """ Masked Autoencoder with VisionTransformer backbone
