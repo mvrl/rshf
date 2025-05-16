@@ -81,7 +81,7 @@ class Climplicit(torch.nn.Module, PyTorchModelHubMixin):
     # >>> Output shape without month: torch.Size([10, 1024])
 
     # Return the CHELSA reconstruction instead of Climplicit embeddings
-    model = Climplicit({"return_chelsa": True})
+    model = Climplicit.from_pretrained("Jobedo/climplicit", config={"return_chelsa": True})
     print("Output shape of CHELSA reconstruction with month:", model(torch.tensor([loc] * batchsize), month).shape)
     # >>> Output shape of CHELSA reconstruction with month: torch.Size([10, 11])
     """
