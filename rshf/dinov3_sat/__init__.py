@@ -1,0 +1,1 @@
+from .model import Dinov3_Sat
