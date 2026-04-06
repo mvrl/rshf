@@ -19,6 +19,56 @@ except ImportError:
         def save_pretrained(self, *args, **kwargs):
             raise ImportError("huggingface_hub is required for save_pretrained")
 
+
+class ProM3EConfig(PretrainedConfig):
+    """
+    Configuration class to store the configuration of a `ProM3E` model.
+
+    Arguments:
+        input_dim: int (default: 512). Dimensionality of each modality input.
+        embed_dim: int (default: 512). Transformer embedding dimension.
+        num_modalities: int (default: 6). Number of input modalities.
+        masked_only: bool (default: False). If True, compute loss only on masked tokens.
+        depth: int (default: 6). Number of transformer blocks.
+        heads: int (default: 8). Number of attention heads.
+        mlp_dim: int (default: 2048). MLP hidden dimension.
+        num_register_tokens: int (default: 4). Number of register tokens appended to input.
+        num_cls_tokens: int (default: 2). Number of CLS tokens (mu and logvar for VIB).
+        dropout: float (default: 0.1). Dropout probability.
+        lambda_kl: float (default: 1e-4). Weight for the KL-divergence term in the VIB loss.
+    """
+    def __init__(
+        self,
+        input_dim=512,
+        embed_dim=512,
+        num_modalities=6,
+        masked_only=False,
+        depth=6,
+        heads=8,
+        mlp_dim=2048,
+        num_register_tokens=4,
+        num_cls_tokens=2,
+        dropout=0.1,
+        lambda_kl=1e-4,
+    ):
+        super(ProM3EConfig, self).__init__()
+        self.input_dim = input_dim
+        self.embed_dim = embed_dim
+        self.num_modalities = num_modalities
+        self.masked_only = masked_only
+        self.depth = depth
+        self.heads = heads
+        self.mlp_dim = mlp_dim
+        self.num_register_tokens = num_register_tokens
+        self.num_cls_tokens = num_cls_tokens
+        self.dropout = dropout
+        self.lambda_kl = lambda_kl
+
+    def from_dict(self, config_dict):
+        for key, value in config_dict.items():
+            setattr(self, key, value)
+        return self
+
 class MLP(nn.Module):
     """Multi-layer Perceptron block with LayerNorm and GELU activation."""
     def __init__(self, dim: int, hidden_dim: int, out_dim: int, dropout: float = 0.):

@@ -1,1 +1,1 @@
-from .model import ScaleMAE_baseline as ScaleMAE
+from .model import ScaleMAE_baseline as ScaleMAE, ScaleMAEConfig

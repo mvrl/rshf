@@ -1,1 +1,1 @@
-from .model import SenCLIP
+from .model import SenCLIP, SenCLIPConfig

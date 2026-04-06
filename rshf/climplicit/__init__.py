@@ -1,1 +1,1 @@
-from .model import Climplicit
+from .model import Climplicit, ClimplicitConfig

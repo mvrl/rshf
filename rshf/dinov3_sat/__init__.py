@@ -1,1 +1,1 @@
-from .model import Dinov3_Sat
+from .model import Dinov3_Sat, Dinov3SatConfig

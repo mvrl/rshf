@@ -1,1 +1,1 @@
-from .model import Presto
+from .model import Presto, PrestoConfig

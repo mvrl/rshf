@@ -9,6 +9,62 @@ from huggingface_hub import PyTorchModelHubMixin
 from transformers import PretrainedConfig
 
 
+class PrithviConfig(PretrainedConfig):
+    """
+    Configuration class to store the configuration of a `Prithvi` model.
+
+    Arguments:
+        img_size: int (default: 224). Input image size (height and width in pixels).
+        patch_size: int (default: 16). Patch size for the patch embedding.
+        num_frames: int (default: 3). Number of temporal frames in the input.
+        tubelet_size: int (default: 1). Temporal patch size (tubelet depth).
+        in_chans: int (default: 6). Number of input channels.
+        embed_dim: int (default: 768). Encoder embedding dimension.
+        depth: int (default: 12). Number of transformer encoder blocks.
+        num_heads: int (default: 12). Number of attention heads in the encoder.
+        mlp_ratio: float (default: 4.0). MLP hidden-dim ratio relative to embed_dim.
+        decoder_embed_dim: int (default: 512). Decoder embedding dimension.
+        decoder_depth: int (default: 8). Number of transformer decoder blocks.
+        decoder_num_heads: int (default: 16). Number of attention heads in the decoder.
+        norm_pix_loss: bool (default: False). If True, normalize pixel targets before loss.
+    """
+    def __init__(
+        self,
+        img_size=224,
+        patch_size=16,
+        num_frames=3,
+        tubelet_size=1,
+        in_chans=6,
+        embed_dim=768,
+        depth=12,
+        num_heads=12,
+        mlp_ratio=4.0,
+        decoder_embed_dim=512,
+        decoder_depth=8,
+        decoder_num_heads=16,
+        norm_pix_loss=False,
+    ):
+        super(PrithviConfig, self).__init__()
+        self.img_size = img_size
+        self.patch_size = patch_size
+        self.num_frames = num_frames
+        self.tubelet_size = tubelet_size
+        self.in_chans = in_chans
+        self.embed_dim = embed_dim
+        self.depth = depth
+        self.num_heads = num_heads
+        self.mlp_ratio = mlp_ratio
+        self.decoder_embed_dim = decoder_embed_dim
+        self.decoder_depth = decoder_depth
+        self.decoder_num_heads = decoder_num_heads
+        self.norm_pix_loss = norm_pix_loss
+
+    def from_dict(self, config_dict):
+        for key, value in config_dict.items():
+            setattr(self, key, value)
+        return self
+
+
 def get_1d_sincos_pos_embed_from_grid(embed_dim, pos):
     """
     embed_dim: output dimension for each position

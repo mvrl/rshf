@@ -6,6 +6,23 @@ from einops import rearrange
 import numpy as np
 from .spherical_harmonics import SphericalHarmonics
 from huggingface_hub import PyTorchModelHubMixin
+from transformers import PretrainedConfig
+
+
+class SatClipConfig(PretrainedConfig):
+    """
+    Configuration class to store the configuration of a `SatClip` model.
+
+    SatClip has a fixed architecture with no configurable parameters.
+    This class is provided for consistency with other models in the library.
+    """
+    def __init__(self):
+        super(SatClipConfig, self).__init__()
+
+    def from_dict(self, config_dict):
+        for key, value in config_dict.items():
+            setattr(self, key, value)
+        return self
 
 def exists(val):
     return val is not None

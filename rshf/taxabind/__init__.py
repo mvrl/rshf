@@ -1,1 +1,1 @@
-from .model import TaxaBind
+from .model import TaxaBind, TaxaBindConfig
