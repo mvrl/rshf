@@ -1,35 +1,37 @@
-# Configuration file for the Sphinx documentation builder.
+from pathlib import Path
+import sys
 
-# -- Project information
 
-project = 'rshf'
-copyright = '2024, Srikumar'
-author = 'Srikumar'
+# -- Project information -----------------------------------------------------
 
-release = '0.1'
-version = '0.0.5'
+project = "rshf"
+copyright = "2026, rshf contributors"
+author = "rshf contributors"
+release = "0.1"
 
-# -- General configuration
+
+# -- General configuration ---------------------------------------------------
+
+# Ensure autodoc can import the local package when building from `docs/`.
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
 
 extensions = [
-    'sphinx.ext.duration',
-    'sphinx.ext.doctest',
-    'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.intersphinx',
+    "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.viewcode",
 ]
 
-intersphinx_mapping = {
-    'python': ('https://docs.python.org/3/', None),
-    'sphinx': ('https://www.sphinx-doc.org/en/master/', None),
+templates_path = ["_templates"]
+exclude_patterns = []
+
+autodoc_default_options = {
+    "members": True,
+    "undoc-members": True,
+    "show-inheritance": True,
 }
-intersphinx_disabled_domains = ['std']
 
-templates_path = ['_templates']
 
-# -- Options for HTML output
+# -- Options for HTML output -------------------------------------------------
 
-html_theme = 'sphinx_rtd_theme'
-
-# -- Options for EPUB output
-epub_show_urls = 'footnote'
+html_theme = "alabaster"
