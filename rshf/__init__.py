@@ -1,1 +1,1 @@
-from .utils import list_models
+from .utils import list_models, from_config
