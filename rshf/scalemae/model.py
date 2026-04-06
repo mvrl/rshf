@@ -318,6 +318,8 @@ class ScaleMAE_baseline(nn.Module, PyTorchModelHubMixin):
         if config is not None:
             if type(config) is dict:
                 config = ScaleMAEConfig().from_dict(config)
+            feat_dim = config.feat_dim
+            fc_dim = config.fc_dim
             global_pool = config.global_pool
             cls_token_flag = config.cls_token_flag
         self.model = get_ScaleMAE_model(global_pool=global_pool, cls_token=cls_token_flag)
