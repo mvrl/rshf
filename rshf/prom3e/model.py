@@ -245,7 +245,7 @@ class ProM3E(nn.Module, PyTorchModelHubMixin):
         for i in range(self.num_modalities):
             predictions[:, i] = self.decoders[i](latent_mean)
 
-        return F.normalize(predictions, dim=-1), mu, logvar
+        return F.normalize(predictions, dim=-1), mu, logvar, x
 
 def main():
     parser = argparse.ArgumentParser(description="ProM3E Model Release Script")
