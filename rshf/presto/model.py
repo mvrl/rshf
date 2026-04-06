@@ -627,10 +627,30 @@ class Decoder(nn.Module):
 
 
 class Presto(nn.Module, PyTorchModelHubMixin):
-    def __init__(self, encoder, decoder):
+    def __init__(self, config: PretrainedConfig):
         super().__init__()
-        self.encoder: Encoder = encoder
-        self.decoder: Decoder = decoder
+        self.config = config
+        if type(self.config) is dict:
+            self.config = PretrainedConfig.from_dict(self.config)
+        
+        self.encoder = Encoder(
+            embedding_size=self.config.encoder_embedding_size,
+            channel_embed_ratio=self.config.channel_embed_ratio,
+            month_embed_ratio=self.config.month_embed_ratio,
+            depth=self.config.encoder_depth,
+            mlp_ratio=self.config.mlp_ratio,
+            num_heads=self.config.encoder_num_heads,
+            max_sequence_length=self.config.max_sequence_length,
+        )
+        self.decoder = Decoder(
+            channel_embeddings=self.encoder.channel_embed,
+            encoder_embed_dim=self.config.encoder_embedding_size,
+            decoder_embed_dim=self.config.decoder_embedding_size,
+            decoder_depth=self.config.decoder_depth,
+            decoder_num_heads=self.config.decoder_num_heads,
+            mlp_ratio=self.config.mlp_ratio,
+            max_sequence_length=self.config.max_sequence_length,
+        )
 
     def forward(
         self,
