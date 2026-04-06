@@ -31,6 +31,9 @@ autodoc_default_options = {
     "show-inheritance": True,
 }
 
+# Allow autodoc to run in docs-only environments without full runtime deps.
+autodoc_mock_imports = ["huggingface_hub"]
+
 
 # -- Options for HTML output -------------------------------------------------
 

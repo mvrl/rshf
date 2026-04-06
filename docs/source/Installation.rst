@@ -1,15 +1,23 @@
 Installation
 ============
 
-Install the latest release from PyPI:
+Install from PyPI
+-----------------
 
 .. code-block:: bash
 
    pip install rshf
 
-Verify the installation:
+Basic import check
+------------------
 
 .. code-block:: python
 
    from rshf import list_models
-   print(len(list_models()))
+   from rshf.satmae import SatMAE
+
+   # Prints matching repositories from the curated collection.
+   list_models("satmae")
+
+   # Load a pretrained checkpoint.
+   model = SatMAE.from_pretrained("MVRL/satmae-vitlarge-fmow-pretrain-800")
