@@ -1,13 +1,15 @@
-rshf Documentation
+rshf documentation
 ==================
 
-`rshf` provides lightweight loading helpers for remote sensing foundation
-models hosted on Hugging Face.
+`rshf` is a unified interface for loading remote sensing foundation models and
+related encoders.
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents
 
-   installation
+   Installation
    usage
-   api
+   model_loading
+   functions
+   API
