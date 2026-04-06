@@ -1,21 +1,13 @@
-rshf: Remote Sensing Foundation Models Easy Benchmarking using Huggingface
-==============================================================================
+rshf Documentation
+==================
 
-Welcome to the documentation for rshf!
-=======================================
-
-**rshf** is a Python library for benchmarking remote sensing foundation models using Huggingface. It provides a simple and intuitive API for benchmarking foundation models on remote sensing tasks.
+`rshf` provides lightweight loading helpers for remote sensing foundation
+models hosted on Hugging Face.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Contents
 
-   Installation
-   API
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   installation
+   usage
+   api
