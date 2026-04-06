@@ -12,4 +12,5 @@ related encoders.
    usage
    model_loading
    functions
+   citations
    API
