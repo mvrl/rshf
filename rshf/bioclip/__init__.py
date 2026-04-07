@@ -1,1 +1,1 @@
-from .model import BioCLIP
+from .model import BioCLIP, BioCLIPConfig

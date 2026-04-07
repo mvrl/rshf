@@ -1,1 +1,1 @@
-from .model import MaskedAutoencoderViT as Prithvi
+from .model import MaskedAutoencoderViT as Prithvi, PrithviConfig

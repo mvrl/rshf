@@ -1,1 +1,1 @@
-from .model import RCME
+from .model import RCME, RCMEConfig

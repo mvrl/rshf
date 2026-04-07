@@ -1,1 +1,1 @@
-from .model import ProM3E
+from .model import ProM3E, ProM3EConfig

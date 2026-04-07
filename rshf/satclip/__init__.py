@@ -1,1 +1,1 @@
-from .model import SatClip
+from .model import SatClip, SatClipConfig

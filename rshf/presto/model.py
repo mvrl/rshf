@@ -10,6 +10,7 @@ from torch.jit import Final
 from torch.nn import functional as F
 from collections import OrderedDict
 from huggingface_hub import PyTorchModelHubMixin
+from transformers import PretrainedConfig
 
 class DynamicWorld2020_2021:
     class_amount=9
@@ -626,6 +627,53 @@ class Decoder(nn.Module):
         return self.reconstruct_inputs(x)
 
 
+class PrestoConfig(PretrainedConfig):
+    """
+    Configuration class to store the configuration of a `Presto` model.
+
+    Arguments:
+        encoder_embedding_size: int (default: 128). Embedding dimension of the encoder.
+        channel_embed_ratio: float (default: 0.25). Fraction of embedding size used for channel embeddings.
+        month_embed_ratio: float (default: 0.25). Fraction of embedding size used for month embeddings.
+        encoder_depth: int (default: 2). Number of transformer blocks in the encoder.
+        mlp_ratio: int (default: 4). MLP hidden-dim multiplier.
+        encoder_num_heads: int (default: 8). Number of attention heads in the encoder.
+        decoder_embedding_size: int (default: 128). Embedding dimension of the decoder.
+        decoder_depth: int (default: 2). Number of transformer blocks in the decoder.
+        decoder_num_heads: int (default: 8). Number of attention heads in the decoder.
+        max_sequence_length: int (default: 24). Maximum input sequence length.
+    """
+    def __init__(
+        self,
+        encoder_embedding_size=128,
+        channel_embed_ratio=0.25,
+        month_embed_ratio=0.25,
+        encoder_depth=2,
+        mlp_ratio=4,
+        encoder_num_heads=8,
+        decoder_embedding_size=128,
+        decoder_depth=2,
+        decoder_num_heads=8,
+        max_sequence_length=24,
+    ):
+        super(PrestoConfig, self).__init__()
+        self.encoder_embedding_size = encoder_embedding_size
+        self.channel_embed_ratio = channel_embed_ratio
+        self.month_embed_ratio = month_embed_ratio
+        self.encoder_depth = encoder_depth
+        self.mlp_ratio = mlp_ratio
+        self.encoder_num_heads = encoder_num_heads
+        self.decoder_embedding_size = decoder_embedding_size
+        self.decoder_depth = decoder_depth
+        self.decoder_num_heads = decoder_num_heads
+        self.max_sequence_length = max_sequence_length
+
+    def from_dict(self, config_dict):
+        for key, value in config_dict.items():
+            setattr(self, key, value)
+        return self
+
+
 class Presto(nn.Module, PyTorchModelHubMixin):
     def __init__(self, config: PretrainedConfig):
         super().__init__()
@@ -703,3 +751,21 @@ class Presto(nn.Module, PyTorchModelHubMixin):
             max_sequence_length=max_sequence_length,
         )
         return cls(encoder, decoder)
+
+    @classmethod
+    def from_config(cls, config: PretrainedConfig):
+        """Construct a Presto model from a PrestoConfig instance."""
+        if type(config) is dict:
+            config = PrestoConfig().from_dict(config)
+        return cls.construct(
+            encoder_embedding_size=config.encoder_embedding_size,
+            channel_embed_ratio=config.channel_embed_ratio,
+            month_embed_ratio=config.month_embed_ratio,
+            encoder_depth=config.encoder_depth,
+            mlp_ratio=config.mlp_ratio,
+            encoder_num_heads=config.encoder_num_heads,
+            decoder_embedding_size=config.decoder_embedding_size,
+            decoder_depth=config.decoder_depth,
+            decoder_num_heads=config.decoder_num_heads,
+            max_sequence_length=config.max_sequence_length,
+        )

@@ -1,1 +1,1 @@
-from .model import CROMA
+from .model import CROMA, CROMAConfig

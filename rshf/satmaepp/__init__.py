@@ -1,1 +1,1 @@
-from .model import MaskedAutoencoderViT as SatMAEPP
+from .model import MaskedAutoencoderViT as SatMAEPP, SatMAEPPConfig

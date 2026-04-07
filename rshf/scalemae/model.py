@@ -6,6 +6,36 @@ import torch.nn as nn
 from timm.models.vision_transformer import Block, PatchEmbed
 import numpy as np
 from huggingface_hub import PyTorchModelHubMixin
+from transformers import PretrainedConfig
+
+
+class ScaleMAEConfig(PretrainedConfig):
+    """
+    Configuration class to store the configuration of a `ScaleMAE` model.
+
+    Arguments:
+        feat_dim: int (default: 1024). Feature dimension of the backbone.
+        fc_dim: int (default: 1024). Fully connected layer dimension.
+        global_pool: bool (default: False). If True, use global average pooling.
+        cls_token_flag: bool (default: True). If True, include a CLS token.
+    """
+    def __init__(
+        self,
+        feat_dim=1024,
+        fc_dim=1024,
+        global_pool=False,
+        cls_token_flag=True,
+    ):
+        super(ScaleMAEConfig, self).__init__()
+        self.feat_dim = feat_dim
+        self.fc_dim = fc_dim
+        self.global_pool = global_pool
+        self.cls_token_flag = cls_token_flag
+
+    def from_dict(self, config_dict):
+        for key, value in config_dict.items():
+            setattr(self, key, value)
+        return self
 
 def get_2d_sincos_pos_embed(embed_dim, grid_size, cls_token=False):
     """
@@ -283,9 +313,16 @@ def get_ScaleMAE_model(global_pool=True, cls_token=True):
 
 
 class ScaleMAE_baseline(nn.Module, PyTorchModelHubMixin):
-    def __init__(self, feat_dim=1024, fc_dim=1024, global_pool=False, cls_token_flag=True):
+    def __init__(self, config: PretrainedConfig = None, feat_dim=1024, fc_dim=1024, global_pool=False, cls_token_flag=True):
         super().__init__()
-        self.model = get_ScaleMAE_model(global_pool= global_pool,cls_token = cls_token_flag)
+        if config is not None:
+            if type(config) is dict:
+                config = ScaleMAEConfig().from_dict(config)
+            feat_dim = config.feat_dim
+            fc_dim = config.fc_dim
+            global_pool = config.global_pool
+            cls_token_flag = config.cls_token_flag
+        self.model = get_ScaleMAE_model(global_pool=global_pool, cls_token=cls_token_flag)
 
     def forward(self,x,patch_size,input_res=10.0):
 

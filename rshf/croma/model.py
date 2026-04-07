@@ -8,6 +8,27 @@ import warnings
 from huggingface_hub import PyTorchModelHubMixin
 from transformers import PretrainedConfig
 
+
+class CROMAConfig(PretrainedConfig):
+    """
+    Configuration class to store the configuration of a `CROMA` model.
+
+    Arguments:
+        size: str (default: 'base'). Encoder size, either 'base' or 'large'.
+        modality: str (default: 'both'). Input modality: 'both', 'SAR', or 'optical'.
+        image_resolution: int (default: 120). Height/width of the input image in pixels.
+    """
+    def __init__(self, size='base', modality='both', image_resolution=120):
+        super(CROMAConfig, self).__init__()
+        self.size = size
+        self.modality = modality
+        self.image_resolution = image_resolution
+
+    def from_dict(self, config_dict):
+        for key, value in config_dict.items():
+            setattr(self, key, value)
+        return self
+
 class CROMA(nn.Module, PyTorchModelHubMixin):
     def __init__(self, config: PretrainedConfig):
         """

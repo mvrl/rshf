@@ -5,6 +5,24 @@ from .siren import SirenNet
 from transformers import PretrainedConfig
 from huggingface_hub import PyTorchModelHubMixin
 
+
+class ClimplicitConfig(PretrainedConfig):
+    """
+    Configuration class to store the configuration of a `Climplicit` model.
+
+    Arguments:
+        return_chelsa: bool (default: False). If True, the model returns the
+            original CHELSA reconstructions instead of implicit embeddings.
+    """
+    def __init__(self, return_chelsa=False):
+        super(ClimplicitConfig, self).__init__()
+        self.return_chelsa = return_chelsa
+
+    def from_dict(self, config_dict):
+        for key, value in config_dict.items():
+            setattr(self, key, value)
+        return self
+
 VAR_NAMES = [
     "cmi",
     "clt",

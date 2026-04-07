@@ -1,1 +1,1 @@
-from .model import MaskedAutoencoderViTAE as RVSA
+from .model import MaskedAutoencoderViTAE as RVSA, RVSAConfig

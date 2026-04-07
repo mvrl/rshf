@@ -15,6 +15,59 @@ from huggingface_hub import PyTorchModelHubMixin
 from transformers import PretrainedConfig
 
 
+class SatMAEPPConfig(PretrainedConfig):
+    """
+    Configuration class to store the configuration of a `SatMAEPP` model.
+
+    Arguments:
+        in_chans: int (default: 3). Number of input channels.
+        proj_ratio: int (default: 4). Upsample projection ratio for the multi-scale branch.
+        img_size: int (default: 224). Input image size (height and width in pixels).
+        patch_size: int (default: 16). Patch size for the patch embedding.
+        embed_dim: int (default: 1024). Encoder embedding dimension.
+        depth: int (default: 24). Number of transformer encoder blocks.
+        num_heads: int (default: 16). Number of attention heads in the encoder.
+        mlp_ratio: float (default: 4.0). MLP hidden-dim ratio relative to embed_dim.
+        decoder_embed_dim: int (default: 512). Decoder embedding dimension.
+        decoder_depth: int (default: 8). Number of transformer decoder blocks.
+        decoder_num_heads: int (default: 16). Number of attention heads in the decoder.
+        norm_pix_loss: bool (default: False). If True, normalize pixel targets before loss.
+    """
+    def __init__(
+        self,
+        in_chans=3,
+        proj_ratio=4,
+        img_size=224,
+        patch_size=16,
+        embed_dim=1024,
+        depth=24,
+        num_heads=16,
+        mlp_ratio=4.0,
+        decoder_embed_dim=512,
+        decoder_depth=8,
+        decoder_num_heads=16,
+        norm_pix_loss=False,
+    ):
+        super(SatMAEPPConfig, self).__init__()
+        self.in_chans = in_chans
+        self.proj_ratio = proj_ratio
+        self.img_size = img_size
+        self.patch_size = patch_size
+        self.embed_dim = embed_dim
+        self.depth = depth
+        self.num_heads = num_heads
+        self.mlp_ratio = mlp_ratio
+        self.decoder_embed_dim = decoder_embed_dim
+        self.decoder_depth = decoder_depth
+        self.decoder_num_heads = decoder_num_heads
+        self.norm_pix_loss = norm_pix_loss
+
+    def from_dict(self, config_dict):
+        for key, value in config_dict.items():
+            setattr(self, key, value)
+        return self
+
+
 def get_2d_sincos_pos_embed(embed_dim, grid_size, cls_token=False):
     """
     grid_size: int of the grid height and width

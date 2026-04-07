@@ -1,1 +1,1 @@
-from .model import RemoteCLIP
+from .model import RemoteCLIP, RemoteCLIPConfig
