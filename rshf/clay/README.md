@@ -11,11 +11,13 @@ Clay is an open-source foundation model for Earth observation that processes sat
 
 ### Installation
 
-Clay requires the official Clay model package:
+Install RSHF with Clay dependencies:
 
 ```bash
-pip install git+https://github.com/Clay-foundation/model.git
+pip install rshf
 ```
+
+The Clay model package is automatically installed as a dependency.
 
 ### Usage
 
