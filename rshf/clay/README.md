@@ -23,8 +23,8 @@ pip install git+https://github.com/Clay-foundation/model.git
 from rshf.clay import Clay
 import torch
 
-# Load pretrained model from checkpoint
-model = Clay.from_checkpoint("clay-v1.5.ckpt")
+# Load pretrained model from HuggingFace Hub (automatically downloads checkpoint)
+model = Clay.from_pretrained("MVRL/clay-v1.5")
 model.eval()
 
 # Prepare input data
@@ -32,10 +32,11 @@ model.eval()
 chips = torch.randn(1, 10, 256, 256)  # [batch, bands, height, width]
 
 # Wavelengths in nanometers for Sentinel-2 bands
+# [Blue, Green, Red, RedEdge1, RedEdge2, RedEdge3, NIR, RedEdge4, SWIR1, SWIR2]
 wavelengths = torch.tensor([[485, 560, 665, 705, 740, 783, 842, 865, 1610, 2190]], 
                            dtype=torch.float32)
 
-# Temporal metadata: [week, hour, lat, lon]
+# Temporal and spatial metadata: [week, hour, lat, lon]
 timestamps = torch.zeros(1, 4)
 
 # Generate embeddings
@@ -45,10 +46,25 @@ with torch.no_grad():
 print(f"Embeddings shape: {embeddings.shape}")  # [1, 1024]
 ```
 
-### Download Pretrained Weights
+### Advanced Usage
 
-```bash
-wget https://huggingface.co/made-with-clay/Clay/resolve/main/v1.5/clay-v1.5.ckpt
+#### Reconstruction
+
+```python
+# Reconstruct masked patches
+with torch.no_grad():
+    outputs = model.reconstruct(chips, timestamps, wavelengths)
+```
+
+#### Custom Sensors
+
+For custom sensors, provide wavelength information for each band:
+
+```python
+# Example: Custom 6-band sensor
+custom_wavelengths = torch.tensor([[450, 550, 650, 800, 1600, 2200]], 
+                                   dtype=torch.float32)
+embeddings = model.encoder(chips, timestamps, custom_wavelengths)
 ```
 
 ### References

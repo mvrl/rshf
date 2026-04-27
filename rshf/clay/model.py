@@ -7,10 +7,11 @@ References:
 - HuggingFace: https://huggingface.co/made-with-clay/Clay
 """
 
+import os
 import torch
 import torch.nn as nn
 from transformers import PretrainedConfig
-from huggingface_hub import PyTorchModelHubMixin
+from huggingface_hub import PyTorchModelHubMixin, hf_hub_download
 import warnings
 
 try:
@@ -79,8 +80,8 @@ class Clay(nn.Module, PyTorchModelHubMixin):
         >>> from rshf.clay import Clay
         >>> import torch
         >>> 
-        >>> # Load pretrained model from checkpoint
-        >>> model = Clay.from_checkpoint("clay-v1.5.ckpt")
+        >>> # Load pretrained model from HuggingFace Hub
+        >>> model = Clay.from_pretrained("MVRL/clay-v1.5")
         >>> model.eval()
         >>> 
         >>> # Prepare input data
@@ -117,19 +118,19 @@ class Clay(nn.Module, PyTorchModelHubMixin):
         self._model = None
         
     @classmethod
-    def from_checkpoint(cls, checkpoint_path, **kwargs):
+    def from_pretrained(cls, repo_id, **kwargs):
         """
-        Load a Clay model from a PyTorch Lightning checkpoint file.
+        Load a Clay model from HuggingFace Hub.
         
         Args:
-            checkpoint_path (str): Path to the .ckpt file (can be local path or URL).
+            repo_id (str): HuggingFace repository ID (e.g., "MVRL/clay-v1.5").
             **kwargs: Additional arguments passed to ClayMAEModule.load_from_checkpoint.
         
         Returns:
             Clay: Loaded Clay model instance.
         
         Example:
-            >>> model = Clay.from_checkpoint("clay-v1.5.ckpt")
+            >>> model = Clay.from_pretrained("MVRL/clay-v1.5")
             >>> model.eval()
         """
         if not CLAY_AVAILABLE:
@@ -138,15 +139,25 @@ class Clay(nn.Module, PyTorchModelHubMixin):
                 "pip install git+https://github.com/Clay-foundation/model.git"
             )
         
+        # Download checkpoint from HuggingFace Hub
+        checkpoint_path = hf_hub_download(
+            repo_id=repo_id,
+            filename="clay-v1.5.ckpt",
+            **{k: v for k, v in kwargs.items() if k in ['revision', 'cache_dir', 'force_download']}
+        )
+        
         # Load the PyTorch Lightning checkpoint
-        clay_model = ClayMAEModule.load_from_checkpoint(checkpoint_path, **kwargs)
+        clay_model = ClayMAEModule.load_from_checkpoint(
+            checkpoint_path,
+            **{k: v for k, v in kwargs.items() if k not in ['revision', 'cache_dir', 'force_download']}
+        )
         
         # Create a wrapper instance
         config = ClayConfig(
-            model_size=kwargs.get('model_size', 'base'),
+            model_size=kwargs.get('model_size', 'large'),
             mask_ratio=kwargs.get('mask_ratio', 0.75),
             patch_size=kwargs.get('patch_size', 8),
-            shuffle=kwargs.get('shuffle', False),
+            shuffle=kwargs.get('shuffle', True),
             metadata_path=kwargs.get('metadata_path', None)
         )
         
