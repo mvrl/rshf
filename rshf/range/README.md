@@ -20,21 +20,6 @@ RANGE is a retrieval-augmented framework for embedding geographic coordinates th
 ### Usage
 
 ```python
-from rshf.range import RANGE
-import torch
-
-# Load pretrained RANGE+ model
-model = RANGE.from_pretrained("MVRL/range")
-
-# Generate embeddings for locations (lon, lat in degrees)
-locs = torch.tensor([[40.0, -80.0], [45.0, -90.0]]).double()
-embeddings = model(locs)
-print(embeddings.shape)  # (2, 1280)
-```
-
-### Create custom RANGE model
-
-```python
 from rshf.range import RANGE, RANGEConfig
 
 # RANGE+ with custom parameters
@@ -46,6 +31,11 @@ config = RANGEConfig(
     db_size="large"        # Database size: 'large' or 'med'
 )
 model = RANGE(config)
+
+# Generate embeddings for locations (lon, lat in degrees)
+locs = torch.tensor([[40.0, -80.0], [45.0, -90.0]]).double()
+embeddings = model(locs)
+print(embeddings.shape)  # (2, 1280)
 
 # Or use standard RANGE
 config = RANGEConfig(model_type="RANGE")

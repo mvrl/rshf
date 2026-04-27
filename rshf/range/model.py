@@ -69,13 +69,6 @@ class RANGE(nn.Module, PyTorchModelHubMixin):
     coordinates by retrieving and aggregating features from similar locations in a database.
     
     Example Usage:
-        >>> from rshf.range import RANGE
-        >>> model = RANGE.from_pretrained("MVRL/range")
-        >>> locs = torch.rand(10, 2).double()  # Random [lon, lat] coordinates
-        >>> embeddings = model(locs)
-        >>> print(embeddings.shape)  # (10, 1280) for RANGE+
-        
-    Define RANGE model from scratch:
         >>> from rshf.range import RANGE, RANGEConfig
         >>> config = RANGEConfig(model_type="RANGE+", beta=0.5)
         >>> model = RANGE(config)
@@ -101,7 +94,7 @@ class RANGE(nn.Module, PyTorchModelHubMixin):
         
         # Initialize SatCLIP location encoder
         from rshf.satclip import SatClip
-        self.loc_model = SatClip()
+        self.loc_model = SatClip.from_pretrained("MVRL/satclip-loc-enc-vit16-l40").double()
         self.loc_model.eval()
         for param in self.loc_model.parameters():
             param.requires_grad = False
@@ -117,6 +110,21 @@ class RANGE(nn.Module, PyTorchModelHubMixin):
             self.location_feature_dim = 1280  # 1024 (high-res) + 256 (SatCLIP)
         else:
             raise ValueError(f"Invalid model_type: {self.model_type}")
+    
+    @classmethod
+    def from_pretrained(cls, pretrained_model_name_or_path: str, *model_args, **kwargs):
+        """Load a pretrained RANGE model.
+        
+        Args:
+            pretrained_model_name_or_path: Path to the pretrained model
+        """
+        raise NotImplementedError("""
+            This method is not available for RANGE model. Use config instead to initialize the model.
+            Example Usage:
+                >>> from rshf.range import RANGE, RANGEConfig
+                >>> config = RANGEConfig(model_type="RANGE+", beta=0.5)
+                >>> model = RANGE(config)
+            """)
     
     def load_database(self, db_path: Optional[str] = None):
         """Load the RANGE database.
@@ -178,7 +186,7 @@ class RANGE(nn.Module, PyTorchModelHubMixin):
         db_high_res_embeddings = self.db_high_resolution_satclip_embeddings.to(device)
         
         # Get SatCLIP embeddings for query locations
-        curr_loc_embeddings = self.loc_model(coords)
+        curr_loc_embeddings = self.loc_model(coords.double()).float()
         
         # Normalize and compute semantic similarity
         curr_loc_embeddings = curr_loc_embeddings / curr_loc_embeddings.norm(p=2, dim=-1, keepdim=True)
