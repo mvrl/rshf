@@ -29,6 +29,7 @@ print(model.forward_encoder(input, mask_ratio=0.0)[0].shape)
 |Model Type|Venue|Citation|
 |----------|-----|--------|
 |BioCLIP|CVPR'24|[link](./rshf/bioclip/README.md)
+|Clay||[link](./rshf/clay/README.md)
 |Climplicit|ICLRW'25|[link](./rshf/climplicit/README.md)
 |CLIP|ICML'21|[link](./rshf/clip/README.md)
 |CROMA|NeurIPS'23|[link](./rshf/croma/README.md)
